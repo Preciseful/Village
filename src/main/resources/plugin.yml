@@ -1,0 +1,15 @@
+name: Village
+version: '${version}'
+main: me.developful.village.Village
+api-version: '1.20'
+authors: [Developful]
+description: Village plugin
+
+commands:
+  job:
+    description: "Customize your village job!"
+
+permissions:
+  village.modify:
+    default: op
+    description: "Allow player to modify the current roles."
