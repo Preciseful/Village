@@ -100,6 +100,7 @@ public class Job implements TabCompleter, CommandExecutor {
 
         return switch (args[0].toLowerCase()) {
             case "set" -> commandSet(player, label, args);
+            case "levelup" -> commandLevelUp(player, label, args);
             case "promote" -> commandPromote(player, label, args);
             case "create" -> commandCreate(player, label, args);
             case "delete" -> commandDelete(player, label, args);
@@ -263,6 +264,54 @@ public class Job implements TabCompleter, CommandExecutor {
         villager.job.level += points;
 
         player.sendMessage(Component.text("Promoted level by " + String.format("%.2f", points) + " points!", NamedTextColor.GREEN));
+        return true;
+    }
+
+    private boolean commandLevelUp(Player player, String label, String[] args) {
+        // todo: maybe refactor this bc its the same as promote
+        if (args.length > 1) {
+            incorrectArgument(
+                    player,
+                    label + " " + args[0],
+                    String.join(" ", Arrays.copyOfRange(args, 1, args.length))
+            );
+
+            return false;
+        }
+
+        var villager = VILLAGERS.get(player.getName());
+        Material neededMaterial = JOB_MATERIALS.get(villager.job.type);
+        var activeItem = player.getInventory().getItemInMainHand();
+
+        if (neededMaterial != activeItem.getType()) {
+            if (neededMaterial == null) {
+                player.sendMessage(Component.text("Pick a job with '/job set'!", NamedTextColor.RED));
+                return false;
+            }
+
+            if (activeItem.getType() == Material.AIR) {
+                player.sendMessage(
+                        Component.text("Expected item ", NamedTextColor.RED)
+                                .append(Component.text(neededMaterial.name().toLowerCase(), NamedTextColor.RED, TextDecoration.UNDERLINED))
+                                .append(Component.text(" to be equipped in the main hand!", NamedTextColor.RED)));
+                return false;
+            }
+
+            player.sendMessage(
+                    Component.text("Invalid item to add to balance with! Needed ", NamedTextColor.RED)
+                            .append(Component.text(neededMaterial.name().toLowerCase(), NamedTextColor.RED, TextDecoration.UNDERLINED))
+                            .append(Component.text(" , but was given ", NamedTextColor.RED))
+                            .append(Component.text(activeItem.getType().name().toLowerCase(), NamedTextColor.RED, TextDecoration.UNDERLINED)));
+            return false;
+        }
+
+        var qty = activeItem.getAmount();
+        var points = qty / (5 + (villager.job.level / 3));
+
+        activeItem.setAmount(0);
+        villager.balance += points;
+
+        player.sendMessage(Component.text("Added to balance " + String.format("%.2f", points) + " points!", NamedTextColor.GREEN));
         return true;
     }
 }
