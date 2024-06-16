@@ -306,7 +306,7 @@ public class Job implements TabCompleter, CommandExecutor {
         }
 
         var qty = activeItem.getAmount();
-        var points = qty / 3;
+        var points = qty * (villager.job.level / 6);
 
         activeItem.setAmount(0);
         villager.balance += points;
